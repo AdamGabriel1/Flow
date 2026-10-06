@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Ferramentas
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Pylance / VS Code
+.vscode/
+!.vscode/settings.json.example
+!.vscode/launch.json.example
+.idea/
+
+# macOS / Linux
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Saída do transpiler (não versionar)
+examples/*.py
+!examples/.gitkeep
+
+# Sessões de debug
+*.log

@@ -1,0 +1,14 @@
+# Predicados agora funcionam: `.field` participa de expressões completas.
+users = [
+    {name: "Alice",   active: true,  age: 30, email: "alice@example.com"},
+    {name: "Bob",     active: false, age: 25, email: "bob@example.com"},
+    {name: "Charlie", active: true,  age: 17, email: "charlie@example.com"},
+    {name: "Alice",   active: true,  age: 30, email: "alice@example.com"},
+]
+
+users
+    |> filter(.active and .age > 18)
+    |> map(.email)
+    |> unique()
+    |> sort()
+    |> print()

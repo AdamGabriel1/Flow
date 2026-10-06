@@ -1,0 +1,14 @@
+# Predicados com and/or/not e acesso a campos compostos.
+# Regra: "pedido caro OU cliente não-VIP".
+orders = [
+    {id: 1, customer: {name: "Alice", vip: true},  total: 200},
+    {id: 2, customer: {name: "Bob",   vip: false}, total: 50},
+    {id: 3, customer: {name: "Alice", vip: true},  total: 120},
+]
+
+orders
+    |> filter(.total > 100 or not .customer.vip)
+    |> map(.customer.name)
+    |> unique()
+    |> sort()
+    |> print()
