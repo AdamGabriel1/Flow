@@ -35,6 +35,25 @@ real, pequeno o suficiente para caber na cabeça, mas completo o bastante
 para exercitar lexing, parsing, resolução de nomes, inferência de tipos
 com unificação, IR, lowering e geração de código — de ponta a ponta.
 
+## Status
+
+Flow é um projeto experimental/educacional e está funcional como
+transpiler para Python. A implementação atual cobre:
+
+- lexer;
+- parser;
+- AST;
+- resolução de nomes;
+- inferência de tipos;
+- unificação;
+- lowering para IR;
+- geração de Python;
+- execução do código gerado.
+
+O foco atual é **aprofundar a implementação do compilador**, não aumentar
+indefinidamente a superfície da linguagem. Features novas entram só
+quando uma etapa existente já está sólida e testada.
+
 ## Arquitetura
 
 ```
@@ -64,8 +83,11 @@ com unificação, IR, lowering e geração de código — de ponta a ponta.
 ```
 
 Cada etapa é um arquivo. Cada etapa tem contrato de entrada e saída
-explícitos. Trocar o backend Python por JS, Go ou LLVM significa escrever
-um novo `*_gen.py` — nada acima do IR precisa mudar.
+explícitos. A arquitetura permite trocar o backend Python por outro
+backend — como JS ou Go — sem alterar as etapas anteriores ao IR. Para
+alvos com modelos de execução mais distantes, como LLVM, o IR atual
+provavelmente precisaria evoluir antes; a separação AST → IR → gen existe
+exatamente para que essa evolução fique contida.
 
 ## Estrutura
 
@@ -118,6 +140,30 @@ python main.py examples/users.flow --run
 # Pular o type checker (útil para depurar parsing)
 python main.py examples/users.flow --no-typecheck
 ```
+
+## Testes
+
+A suíte cobre as principais etapas do pipeline — não só o resultado final.
+Cada teste mira uma camada diferente do compilador:
+
+- **lexer** — operadores multi-char (`==`, `!=`, `<=`, `>=`, `|>`),
+  números, strings, comentários;
+- **parser** — atribuições, `fn`, pipelines, predicados com precedência
+  correta (`and`/`or`/`not` sobre comparações);
+- **type checker** — unificação, registros abertos, rejeição de `.field`
+  em tipos incompatíveis, erros de nome;
+- **IR / geração** — verificação da forma do Python emitido
+  (`.field` vira `['field']`, não `.field`);
+- **execução** — rodar o Python gerado e comparar a saída real com a
+  esperada, incluindo a semântica preguiçosa de `map`/`filter`.
+
+```bash
+python tests/test_flow.py
+```
+
+A suíte atual tem 14 testes. O objetivo é que ela cresça a cada vez que
+uma etapa do compilador for refinada — **testes são o mecanismo pelo qual
+o compilador melhora**, não só uma rede de segurança.
 
 ## A linguagem
 
@@ -184,7 +230,7 @@ true / false   # Bool
 
 ### Builtins
 
-| Flow      | Python       | Tipo (aprox.)                     |
+| Flow      | Python       | Assinatura                        |
 |-----------|--------------|-----------------------------------|
 | `filter`  | `filter`     | `(a → Bool, List[a]) → List[a]`   |
 | `map`     | `map`        | `(a → b, List[a]) → List[b]`      |
@@ -318,8 +364,8 @@ Saída: `['Alice', 'Bob']`
 ## Por que existe
 
 Flow é um exercício de **compiladores antes de runtime**. Ele complementa
-projetos como [Forge] (análise estática, CFG, data-flow) e antecede algo
-como [Lumina] (linguagem completa com LLVM, memória, runtime). A ideia é
+projetos como Forge (análise estática, CFG, data-flow) e antecede algo
+como Lumina (linguagem completa com LLVM, memória, runtime). A ideia é
 ter, num escopo controlado, cada etapa de um compilador real — e ter
 disciplina para não transformá-lo numa segunda Lumina antes da hora.
 
